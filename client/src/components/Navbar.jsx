@@ -146,9 +146,12 @@ export default function Navbar() {
               </button>
             </div>
           ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Link to="/login" className="btn btn-secondary btn-sm">
-                Log In
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+              <Link to="/login/student" className="btn btn-secondary btn-sm" title="Student Portal Login">
+                Student Login
+              </Link>
+              <Link to="/login/staff" className="btn btn-outline btn-sm" title="Counselor & Admin Portal" style={{ borderColor: 'rgba(6, 182, 212, 0.4)', color: 'var(--accent-teal)' }}>
+                Counselor/Admin
               </Link>
               <Link to="/register" className="btn btn-primary btn-sm">
                 Get Started

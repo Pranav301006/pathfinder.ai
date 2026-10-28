@@ -1,9 +1,19 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Compass, LogIn, Lock, Mail, Zap, AlertCircle } from 'lucide-react';
+import {
+  Compass,
+  LogIn,
+  Lock,
+  Mail,
+  Zap,
+  GraduationCap,
+  ShieldCheck,
+  AlertCircle
+} from 'lucide-react';
 
 export default function LoginPage() {
+  const [activeTab, setActiveTab] = useState('student'); // 'student' | 'staff'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -49,60 +59,98 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="main-content" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '80vh' }}>
-      <div className="container" style={{ maxWidth: '480px' }}>
+    <div className="main-content" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '80vh', padding: '2rem 1rem' }}>
+      <div className="container" style={{ maxWidth: '520px' }}>
         <div className="glass-panel" style={{ padding: '2.5rem 2rem' }}>
           {/* Header */}
-          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
             <div className="brand-icon" style={{ width: '3rem', height: '3rem', margin: '0 auto 1rem' }}>
               <Compass size={28} />
             </div>
-            <h2 style={{ fontSize: '1.8rem', fontWeight: 800 }}>Welcome Back</h2>
+            <h2 style={{ fontSize: '1.8rem', fontWeight: 800 }}>Welcome to PathFinder AI</h2>
             <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-              Access your personalized AI career dashboard
+              Select your portal to sign in
             </p>
           </div>
 
+          {/* Portal Selector Tabs */}
+          <div style={{ display: 'flex', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '12px', padding: '4px', marginBottom: '1.5rem' }}>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab('student');
+                setEmail('');
+                setPassword('');
+                setError('');
+              }}
+              className={`btn btn-sm ${activeTab === 'student' ? 'btn-primary' : 'btn-secondary'}`}
+              style={{ flex: 1, border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', padding: '0.65rem' }}
+            >
+              <GraduationCap size={16} />
+              <span>Student Portal</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab('staff');
+                setEmail('');
+                setPassword('');
+                setError('');
+              }}
+              className={`btn btn-sm ${activeTab === 'staff' ? 'btn-primary' : 'btn-secondary'}`}
+              style={{ flex: 1, border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', padding: '0.65rem' }}
+            >
+              <ShieldCheck size={16} />
+              <span>Counselor & Admin</span>
+            </button>
+          </div>
+
           {/* Quick Demo Launchpad */}
-          <div style={{ background: 'rgba(79, 70, 229, 0.08)', border: '1px solid rgba(79, 70, 229, 0.25)', borderRadius: '12px', padding: '1rem', marginBottom: '1.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', fontWeight: 700, color: 'var(--primary-light)', marginBottom: '0.65rem' }}>
+          <div style={{ background: activeTab === 'student' ? 'rgba(79, 70, 229, 0.08)' : 'rgba(6, 182, 212, 0.08)', border: activeTab === 'student' ? '1px solid rgba(79, 70, 229, 0.25)' : '1px solid rgba(6, 182, 212, 0.25)', borderRadius: '12px', padding: '1rem', marginBottom: '1.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', fontWeight: 700, color: activeTab === 'student' ? 'var(--primary-light)' : 'var(--accent-teal)', marginBottom: '0.65rem' }}>
               <Zap size={15} color="#fbbf24" />
-              <span>One-Click Evaluator Demo Access</span>
+              <span>1-Click {activeTab === 'student' ? 'Student' : 'Staff'} Demo Access:</span>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem' }}>
-              <button
-                type="button"
-                onClick={() => handleDemo('student')}
-                className="btn btn-secondary btn-sm"
-                style={{ fontSize: '0.78rem', justifyContent: 'center' }}
-              >
-                Student (Fresh)
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDemo('rahul')}
-                className="btn btn-secondary btn-sm"
-                style={{ fontSize: '0.78rem', justifyContent: 'center', color: 'var(--primary-light)' }}
-              >
-                Student (Ready)
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDemo('counselor')}
-                className="btn btn-secondary btn-sm"
-                style={{ fontSize: '0.78rem', justifyContent: 'center', color: 'var(--accent-teal)' }}
-              >
-                Counselor
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDemo('admin')}
-                className="btn btn-secondary btn-sm"
-                style={{ fontSize: '0.78rem', justifyContent: 'center', color: '#fbbf24' }}
-              >
-                Admin
-              </button>
-            </div>
+
+            {activeTab === 'student' ? (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem' }}>
+                <button
+                  type="button"
+                  onClick={() => handleDemo('student')}
+                  className="btn btn-secondary btn-sm"
+                  style={{ fontSize: '0.78rem', justifyContent: 'center' }}
+                >
+                  Student (Fresh Assessment)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDemo('rahul')}
+                  className="btn btn-secondary btn-sm"
+                  style={{ fontSize: '0.78rem', justifyContent: 'center', color: 'var(--primary-light)', borderColor: 'rgba(79, 70, 229, 0.4)' }}
+                >
+                  Rahul (Completed Report)
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem' }}>
+                <button
+                  type="button"
+                  onClick={() => handleDemo('counselor')}
+                  className="btn btn-secondary btn-sm"
+                  style={{ fontSize: '0.78rem', justifyContent: 'center', color: 'var(--accent-teal)', borderColor: 'rgba(6, 182, 212, 0.4)' }}
+                >
+                  Counselor (Review Hub)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDemo('admin')}
+                  className="btn btn-secondary btn-sm"
+                  style={{ fontSize: '0.78rem', justifyContent: 'center', color: '#fbbf24' }}
+                >
+                  Admin (AI Audit Logs)
+                </button>
+              </div>
+            )}
           </div>
 
           {error && (
@@ -114,7 +162,7 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label className="form-label">Email Address</label>
+              <label className="form-label">{activeTab === 'student' ? 'Student Email' : 'Counselor / Admin Email'}</label>
               <div style={{ position: 'relative' }}>
                 <Mail size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-dim)' }} />
                 <input
@@ -122,7 +170,7 @@ export default function LoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="student@pathfinder.ai"
+                  placeholder={activeTab === 'student' ? 'student@pathfinder.ai' : 'counselor@pathfinder.ai'}
                   className="form-input"
                   style={{ paddingLeft: '2.5rem' }}
                 />
@@ -149,18 +197,29 @@ export default function LoginPage() {
               type="submit"
               disabled={submitting}
               className="btn btn-primary"
-              style={{ width: '100%', marginTop: '0.5rem', padding: '0.85rem' }}
+              style={{
+                width: '100%',
+                marginTop: '0.5rem',
+                padding: '0.85rem',
+                background: activeTab === 'student'
+                  ? 'linear-gradient(135deg, var(--primary) 0%, #6366f1 100%)'
+                  : 'linear-gradient(135deg, #06b6d4 0%, var(--primary) 100%)'
+              }}
             >
               <LogIn size={18} />
-              <span>{submitting ? 'Authenticating...' : 'Sign In'}</span>
+              <span>{submitting ? 'Authenticating...' : `Sign In as ${activeTab === 'student' ? 'Student' : 'Staff'}`}</span>
             </button>
           </form>
 
-          <div style={{ textAlign: 'center', marginTop: '1.75rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-            Don't have an account?{' '}
+          <div style={{ borderTop: '1px solid var(--border-glass)', marginTop: '1.5rem', paddingTop: '1.25rem', display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
             <Link to="/register" style={{ color: 'var(--primary-light)', fontWeight: 600 }}>
               Create Account
             </Link>
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <Link to="/login/student" style={{ color: 'var(--text-muted)' }}>Student Page</Link>
+              <span style={{ color: 'var(--text-dim)' }}>•</span>
+              <Link to="/login/staff" style={{ color: 'var(--text-muted)' }}>Counselor/Admin Page</Link>
+            </div>
           </div>
         </div>
       </div>

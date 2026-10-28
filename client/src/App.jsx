@@ -9,6 +9,8 @@ import Footer from './components/Footer';
 // Pages
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
+import StudentLoginPage from './pages/StudentLoginPage';
+import StaffLoginPage from './pages/StaffLoginPage';
 import RegisterPage from './pages/RegisterPage';
 import AssessmentPage from './pages/AssessmentPage';
 import RecommendationReportPage from './pages/RecommendationReportPage';
@@ -29,6 +31,11 @@ function AppLayout() {
         {/* Public Routes */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/login/student" element={<StudentLoginPage />} />
+        <Route path="/student-login" element={<StudentLoginPage />} />
+        <Route path="/login/staff" element={<StaffLoginPage />} />
+        <Route path="/login/counselor" element={<StaffLoginPage />} />
+        <Route path="/login/admin" element={<StaffLoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/kiosk" element={<KioskModePage />} />
 

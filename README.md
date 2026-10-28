@@ -88,11 +88,15 @@ erDiagram
 
 ## 🔌 RESTful API Reference (`/api/v1`)
 
-### Authentication & User Management
+### Authentication & Portal Routing
 - `POST /api/v1/auth/register` — Register student or counselor with role-specific parameters.
 - `POST /api/v1/auth/login` — Authenticate user and issue JWT access token.
 - `GET  /api/v1/auth/me` — Retrieve current active session and user profile.
 - `POST /api/v1/auth/logout` — Terminate session.
+- **Frontend Portals**:
+  - `/login/student` — Dedicated Student Portal Sign In (with 1-click student demo accounts).
+  - `/login/staff` (also `/login/counselor`, `/login/admin`) — Dedicated Counselor & Admin Portal Sign In.
+  - `/login` — Unified Portal Hub with toggle tabs for Student and Staff.
 - `GET  /api/v1/users/profile` — Fetch student or counselor profile details.
 - `PUT  /api/v1/users/profile` — Update education stream, goals, or specialization.
 - `GET  /api/v1/users/me/export` — **Data Portability**: Download full dossier JSON.

@@ -16,7 +16,8 @@ import {
   Monitor,
   Check,
   Zap,
-  Globe2
+  Globe2,
+  GraduationCap
 } from 'lucide-react';
 
 export default function LandingPage() {
@@ -85,7 +86,7 @@ export default function LandingPage() {
           </p>
 
           {/* CTA Buttons */}
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap', marginBottom: '3rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '0.85rem', flexWrap: 'wrap', marginBottom: '3rem' }}>
             {isAuthenticated ? (
               <Link to={user.role === 'counselor' ? '/counselor' : '/assessment'} className="btn btn-primary btn-lg">
                 <span>Continue to {user.role === 'counselor' ? 'Counselor Hub' : 'Assessment'}</span>
@@ -94,12 +95,20 @@ export default function LandingPage() {
             ) : (
               <>
                 <Link to="/register" className="btn btn-primary btn-lg">
-                  <span>Start Career Assessment</span>
+                  <span>Start Assessment</span>
                   <ArrowRight size={20} />
                 </Link>
-                <Link to="/kiosk" className="btn btn-secondary btn-lg" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <Monitor size={20} color="var(--accent-teal)" />
-                  <span>Launch Kiosk Mode</span>
+                <Link to="/login/student" className="btn btn-secondary btn-lg" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <GraduationCap size={20} color="var(--primary-light)" />
+                  <span>Student Login</span>
+                </Link>
+                <Link to="/login/staff" className="btn btn-secondary btn-lg" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <ShieldCheck size={20} color="var(--accent-teal)" />
+                  <span>Counselor / Admin</span>
+                </Link>
+                <Link to="/kiosk" className="btn btn-outline btn-lg" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Monitor size={20} color="#fbbf24" />
+                  <span>Kiosk Mode</span>
                 </Link>
               </>
             )}
