@@ -37,12 +37,28 @@ export default function KioskModePage() {
   const [mobileUrl, setMobileUrl] = useState('');
   const [copied, setCopied] = useState(false);
 
+  // Network IP for real phone Wi-Fi access
+  const [networkIp, setNetworkIp] = useState('10.108.48.55');
+  const [networkPort, setNetworkPort] = useState('5173');
+
   // Kiosk timer
   const [idleSeconds, setIdleSeconds] = useState(90);
   const [showWarning, setShowWarning] = useState(false);
 
   const navigate = useNavigate();
   const timerRef = useRef(null);
+
+  // Auto-detect host IP on mount
+  useEffect(() => {
+    fetch('/api/v1/network-info')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.data.localIp && data.data.localIp !== 'localhost') {
+          setNetworkIp(data.data.localIp);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Reset idle countdown on interaction
   const resetIdleTimer = () => {
@@ -131,8 +147,9 @@ export default function KioskModePage() {
 
     setComputedCareer(matched);
 
-    // Build real URL that opens the report
-    const targetUrl = `${window.location.origin}/recommendations`;
+    // Build real URL that opens the report using LAN IP for mobile phone connectivity
+    const host = (networkIp && networkIp !== 'localhost') ? networkIp : window.location.hostname;
+    const targetUrl = `http://${host}:${networkPort}/recommendations`;
     setMobileUrl(targetUrl);
 
     // Generate real, high-resolution scannable QR Code image
@@ -152,6 +169,26 @@ export default function KioskModePage() {
     }
 
     setStep('results');
+  };
+
+  const updateNetworkIp = async (newIp) => {
+    setNetworkIp(newIp);
+    const target = `http://${newIp}:${networkPort}/recommendations`;
+    setMobileUrl(target);
+    try {
+      const qrData = await QRCode.toDataURL(target, {
+        width: 300,
+        margin: 2,
+        color: {
+          dark: '#0f172a',
+          light: '#ffffff'
+        },
+        errorCorrectionLevel: 'M'
+      });
+      setQrCodeDataUrl(qrData);
+    } catch (err) {
+      console.error('Failed to regenerate QR Code:', err);
+    }
   };
 
   const handleCopyLink = () => {
@@ -540,9 +577,31 @@ export default function KioskModePage() {
                 )}
               </div>
 
-              <p style={{ fontSize: '0.82rem', color: '#94a3b8', lineHeight: '1.5', marginBottom: '1rem' }}>
+              <p style={{ fontSize: '0.82rem', color: '#94a3b8', lineHeight: '1.5', marginBottom: '0.75rem' }}>
                 Point your smartphone camera (iPhone or Android) at this code to immediately open the full guidance report and 10-week roadmap!
               </p>
+
+              {/* Wi-Fi Connection Information & IP Editor */}
+              <div style={{ background: 'rgba(6, 182, 212, 0.08)', border: '1px solid rgba(6, 182, 212, 0.25)', borderRadius: '12px', padding: '0.75rem 0.9rem', marginBottom: '1rem', textAlign: 'left', fontSize: '0.8rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
+                  <span style={{ color: 'var(--accent-teal)', fontWeight: 700 }}>📶 Wi-Fi LAN Address:</span>
+                  <span style={{ color: '#34d399', fontSize: '0.72rem', fontWeight: 600 }}>Phone must be on same Wi-Fi</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.2rem' }}>
+                  <input
+                    type="text"
+                    value={networkIp}
+                    onChange={(e) => updateNetworkIp(e.target.value)}
+                    className="form-input"
+                    style={{ padding: '0.25rem 0.6rem', fontSize: '0.82rem', height: '30px', flex: 1 }}
+                    title="Change if connected via mobile hotspot"
+                  />
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>:5173</span>
+                </div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.35rem', wordBreak: 'break-all' }}>
+                  URL: <code>{mobileUrl}</code>
+                </div>
+              </div>
 
               {/* Desktop Direct Links */}
               <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>

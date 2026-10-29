@@ -98,8 +98,12 @@ export default function AssessmentPage() {
       const submitRes = await api.submitAssessment({ answers: formattedAnswers });
       if (!submitRes.success) throw new Error(submitRes.error || 'Failed to submit assessment');
 
-      // 2. Generate personalized recommendations
-      await api.generateRecommendations();
+      // 2. Generate personalized recommendations (non-fatal if it fails)
+      try {
+        await api.generateRecommendations();
+      } catch (recErr) {
+        console.warn('Recommendation generation failed, will retry on report page:', recErr.message);
+      }
 
       // Clear temp storage
       localStorage.removeItem('pathfinder_temp_answers');
@@ -107,7 +111,7 @@ export default function AssessmentPage() {
       // Navigate to recommendation report
       navigate('/recommendations');
     } catch (err) {
-      setError(err.message || 'Error generating career report. Please try again.');
+      setError(err.message || 'Error submitting assessment. Please try again.');
       setSubmitting(false);
     }
   };

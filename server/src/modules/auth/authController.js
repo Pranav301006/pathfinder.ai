@@ -1,7 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { z } = require('zod');
-const { v4: uuidv4 } = require('crypto');
 const db = require('../../db');
 const config = require('../../config');
 

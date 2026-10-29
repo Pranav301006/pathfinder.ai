@@ -64,6 +64,8 @@ exports.submitAssessment = (req, res, next) => {
     `);
 
     db.transaction(() => {
+      const answersToInsert = [];
+
       for (const ans of answers) {
         const q = qMap.get(ans.questionId);
         if (!q) continue;
@@ -71,14 +73,13 @@ exports.submitAssessment = (req, res, next) => {
         let verifiedScore = null;
 
         if (q.part === 'interest') {
-          // dimension is Realistic, Investigative, Artistic, Social, Enterprising, Conventional
           const char = q.dimension[0].toUpperCase();
-          const ratingVal = (ans.selectedOptionIndex !== undefined ? ans.selectedOptionIndex + 1 : 3); // 1-5
+          const ratingVal = (ans.selectedOptionIndex !== undefined ? ans.selectedOptionIndex + 1 : 3);
           riasecRaw[char] += ratingVal;
           riasecCounts[char] += 1;
         } else if (q.part === 'skill') {
-          const selfRating = (ans.selectedOptionIndex !== undefined ? ans.selectedOptionIndex + 1 : 3); // 1-5
-          let quizAccuracy = 0.5; // default if no quiz answered
+          const selfRating = (ans.selectedOptionIndex !== undefined ? ans.selectedOptionIndex + 1 : 3);
+          let quizAccuracy = 0.5;
           let quizCorrectCount = 0;
 
           if (q.reality_quiz_json && Array.isArray(ans.realityQuizAnswers)) {
@@ -91,7 +92,6 @@ exports.submitAssessment = (req, res, next) => {
             quizAccuracy = quizCorrectCount / quiz.length;
           }
 
-          // Verified Skill Formula: 40% weight to self-rating + 60% weight to objective reality micro-quiz
           const rawVerified = (selfRating * 0.4) + ((quizAccuracy * 5) * 0.6);
           verifiedScore = Math.round(rawVerified * 10) / 10;
           verifiedSkills[q.dimension] = verifiedScore;
@@ -111,33 +111,26 @@ exports.submitAssessment = (req, res, next) => {
           workValues[q.dimension] = chosenText;
         }
 
-        insertAnswer.run(
-          generateId('ans'),
-          assessmentId,
-          q.id,
-          JSON.stringify(ans),
-          verifiedScore
-        );
+        answersToInsert.push({ qId: q.id, ans, verifiedScore });
       }
 
       // Compute normalized RIASEC scores (0 - 100)
       const riasecScores = {};
       for (const key of ['R', 'I', 'A', 'S', 'E', 'C']) {
         const count = riasecCounts[key] || 1;
-        const avg = riasecRaw[key] / count; // 1-5
+        const avg = riasecRaw[key] / count;
         riasecScores[key] = Math.round(((avg - 1) / 4) * 100);
       }
 
-      // Holland Code (top 3 traits, e.g., 'ICE' or 'RIA')
+      // Holland Code
       const sortedTraits = Object.entries(riasecScores)
         .sort((a, b) => b[1] - a[1]);
       const hollandCode = sortedTraits.slice(0, 3).map(t => t[0]).join('');
       riasecScores.hollandCode = hollandCode;
 
-      // Check if any major reality gap exists
       const majorMismatches = realityCheckDetails.filter(r => r.isMismatch);
 
-      // Save assessment
+      // 1. Insert assessment record FIRST so foreign keys in assessment_answers succeed
       db.prepare(`
         INSERT INTO assessments (id, student_id, status, riasec_scores_json, verified_skills_json, work_values_json, reality_check_gap_json, completed_at)
         VALUES (?, ?, 'completed', ?, ?, ?, ?, CURRENT_TIMESTAMP)
@@ -153,6 +146,17 @@ exports.submitAssessment = (req, res, next) => {
           mismatches: majorMismatches
         })
       );
+
+      // 2. Insert each answer record referencing the now existing assessmentId
+      for (const item of answersToInsert) {
+        insertAnswer.run(
+          generateId('ans'),
+          assessmentId,
+          item.qId,
+          JSON.stringify(item.ans),
+          item.verifiedScore
+        );
+      }
 
       // Log activity event
       db.prepare(`

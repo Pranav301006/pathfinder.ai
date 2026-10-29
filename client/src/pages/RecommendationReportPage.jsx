@@ -32,13 +32,38 @@ export default function RecommendationReportPage() {
   useEffect(() => {
     async function loadData() {
       try {
-        const [recRes, assRes] = await Promise.all([
+        const [recResult, assResult] = await Promise.allSettled([
           api.getLatestRecommendation(),
           api.getLatestAssessment()
         ]);
 
-        if (recRes.success) setRecommendation(recRes.data);
-        if (assRes.success) setAssessment(assRes.data);
+        const hasRec = recResult.status === 'fulfilled' && recResult.value?.success;
+        const hasAss = assResult.status === 'fulfilled' && assResult.value?.success;
+
+        if (hasRec) {
+          setRecommendation(recResult.value.data);
+        }
+        if (hasAss) {
+          setAssessment(assResult.value.data);
+        }
+
+        // Auto-generate recommendations if assessment exists but recommendations don't
+        if (hasAss && !hasRec) {
+          try {
+            const genRes = await api.generateRecommendations();
+            if (genRes.success) {
+              setRecommendation(genRes.data);
+            }
+          } catch (genErr) {
+            console.warn('Auto-generation of recommendations failed:', genErr.message);
+            setError('Assessment found but could not generate recommendations. Please try again.');
+          }
+        }
+
+        // Only set error if BOTH failed (no data at all)
+        if (!hasRec && !hasAss) {
+          setError('No assessment data found. Please complete the assessment first.');
+        }
       } catch (err) {
         setError(err.message || 'No recommendation report found. Please complete the assessment.');
       } finally {

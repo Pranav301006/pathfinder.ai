@@ -27,6 +27,8 @@ app.use(express.urlencoded({ extended: true }));
 // Apply general API rate limiter
 app.use('/api/', apiLimiter);
 
+const os = require('os');
+
 // Health check
 app.get('/api/v1/health', (req, res) => {
   res.json({
@@ -35,6 +37,32 @@ app.get('/api/v1/health', (req, res) => {
     system: 'PathFinder AI REST API',
     version: '1.0.0',
     timestamp: new Date().toISOString()
+  });
+});
+
+// Dynamic Local Network IP detection for Kiosk QR Codes
+app.get('/api/v1/network-info', (req, res) => {
+  const interfaces = os.networkInterfaces();
+  let localIp = 'localhost';
+
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      // Find IPv4, not internal (not 127.0.0.1)
+      if (iface.family === 'IPv4' && !iface.internal) {
+        localIp = iface.address;
+        break;
+      }
+    }
+    if (localIp !== 'localhost') break;
+  }
+
+  res.json({
+    success: true,
+    data: {
+      localIp,
+      port: 5173,
+      clientUrl: `http://${localIp}:5173`
+    }
   });
 });
 
